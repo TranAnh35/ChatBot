@@ -1,0 +1,10 @@
+.vscode/
+__pycache__/
+
+.env
+uploaded_files/
+*.faiss
+*.db
+*.npy
+*.bin
+*.txt
