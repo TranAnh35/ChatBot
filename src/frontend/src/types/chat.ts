@@ -65,6 +65,7 @@ export interface ChatInputProps {
 export interface GenerateContentRequest {
   input: string; // Nội dung tin nhắn
   files?: File[]; // Danh sách file đính kèm (tùy chọn)
+  isWebSearchEnabled?: boolean;
 }
 
 export interface GenerateContentResponse {

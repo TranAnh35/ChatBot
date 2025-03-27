@@ -8,7 +8,7 @@ import FileDropzone from './FileDropzone';
 import { GenerateContentRequest } from '../../types/chat';
 import { UploadedFile } from '../../types/interface';
 
-export const ChatBox: React.FC<ChatBoxProps> = ({ uploadedFiles, selectedFiles, onFileSelect, onUploadClick }) => {
+export const ChatBox: React.FC<ChatBoxProps> = ({ uploadedFiles, selectedFiles, onFileSelect}) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -33,7 +33,6 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ uploadedFiles, selectedFiles, 
     if (!input.trim()) return;
   
     const uploadedFilesArray = chatFiles.length > 0 ? convertFilesToUploadedFiles(chatFiles) : undefined;
-    console.log(uploadedFilesArray)
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -51,6 +50,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ uploadedFiles, selectedFiles, 
       const requestData: GenerateContentRequest = {
         input: userMessage.content,
         files: chatFiles.length > 0 ? [...chatFiles] : undefined,
+        isWebSearchEnabled: isWebSearchEnabled,
       };
   
       const data = await generateContent(requestData);

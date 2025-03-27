@@ -5,9 +5,10 @@ import { Button } from '../ui/button';
 
 interface HeaderProps {
   onUploadClick: () => void;
+  onSettingsClick: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onUploadClick }) => {
+export const Header: React.FC<HeaderProps> = ({ onUploadClick, onSettingsClick }) => {
   return (
     <header className="bg-white border-b border-gray-200 fixed top-0 left-0 right-0 z-50">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -22,7 +23,7 @@ export const Header: React.FC<HeaderProps> = ({ onUploadClick }) => {
           <Button variant="ghost" size="icon" onClick={onUploadClick}>
             <Upload className="h-5 w-5" />
           </Button>
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" onClick={onSettingsClick}>
             <Settings className="h-5 w-5" />
           </Button>
         </div>
