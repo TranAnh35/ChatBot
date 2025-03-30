@@ -8,8 +8,11 @@ vector_db = VectorDB()
 
 @router.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
-    file_path = save_file(file)
-    return {"message": "File uploaded successfully", "file_path": file_path}
+    try:
+        file_path = save_file(file)
+        return {"message": "File uploaded successfully", "file_path": file_path}
+    except Exception as e:
+        return {"error": f"Error uploading file: {str(e)}"}
 
 @router.get("/files")
 async def get_files():
@@ -18,14 +21,13 @@ async def get_files():
 @router.delete("/delete/{file_name}")
 async def delete_uploaded_file(file_name: str):
     decoded_filename = unquote(file_name)
-    print("delete file: " + decoded_filename)
     
     # Xóa file khỏi hệ thống
     if delete_file(decoded_filename):
         # Xóa dữ liệu khỏi database
         vector_db.delete_file_from_db(decoded_filename)
         return {"message": "File deleted successfully"}
-    raise HTTPException(status_code=404, detail="File not found")
+    return {"error": "File not found"}
 
 @router.post("/read")
 async def read_file(file: UploadFile = File(...)):
@@ -36,4 +38,4 @@ async def read_file(file: UploadFile = File(...)):
         content = await read_uploaded_file(file)
         return {"file_name": file.filename, "content": content}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error reading file: {str(e)}")
+        return {"error": f"Error reading file: {str(e)}"}

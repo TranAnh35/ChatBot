@@ -1,5 +1,5 @@
 from models.llm import LLM
-
+from typing import List, Dict
 class GeneratorService:
     def __init__(self):
         self.llm = LLM()
@@ -9,3 +9,6 @@ class GeneratorService:
     
     async def inDepth_context(self, prompt):
         return await self.llm.inDepth_context_analysis(prompt)
+    
+    async def merge_context(self, web_results: List[List[Dict]]):
+        return await self.llm.merge_context(web_results)

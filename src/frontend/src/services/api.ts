@@ -28,27 +28,21 @@ export const generateContent = async (data: GenerateContentRequest): Promise<Gen
     fileContents = fileContentsArray.join('\n');
   }
 
-  let webResponse = '';
+  let webResponse;
   if (data.isWebSearchEnabled) {
-    const inDepth_context = await api.get('/generate/inDepth_context', {
-      params: { question: data.input }
-    });
-
-    let num_web_google = 0;
-
-    if (inDepth_context.data === 'high') {
-      num_web_google = 5;
-    } else if (inDepth_context.data === 'medium') {
-      num_web_google = 2;
-    } else {
-      num_web_google = 1;
-    }
-
     const webSearchResult = await api.get<{ response: string }>('/web/search', {
-      params: { question: data.input }
+      params: { query: data.input }
     }).catch(() => ({ data: { response: '' } }));
-    webResponse = webSearchResult.data.response;
+    console.log(webSearchResult.data);
+
+    webResponse = await api.post<{ content: string }>('/generate/merge_context', {
+      results: webSearchResult.data
+    }).catch(() => ({ data: { content: '' } }));
+
+    console.log(webResponse.data);
   }
+
+  // console.log(webResponse.data);
 
   // Gọi API LLM với prompt bao gồm nội dung file
   const llmResponse = await api.get('/generate/gen_content', {
@@ -56,7 +50,7 @@ export const generateContent = async (data: GenerateContentRequest): Promise<Gen
       prompt: data.input,
       rag_response: ragResponse.data.response,
       file_response: fileContents,
-      web_response: webResponse,
+      web_response: webResponse?.data.content,
     },
   });
 
@@ -87,4 +81,24 @@ export const deleteFile = async (filename: string): Promise<void> => {
   const encodedFilename = encodeURIComponent(filename);
   await api.delete(`/files/delete/${encodedFilename}`);
   await api.post("/rag/sync-files");
+};
+
+export const setApiKey = async (apiKey: string): Promise<string> => {
+  const response = await api.post<{ message: string }>("/api/set_api_key", apiKey, {
+    headers: { "Content-Type": "text/plain" }
+  });
+  return response.data.message;
+};
+
+export const validateApiKey = async (apiKey: string): Promise<boolean> => {
+  try {
+    // Giả sử bạn thêm một endpoint mới để kiểm tra
+    const response = await api.post<{ valid: boolean }>("/api/validate_api_key", apiKey, {
+      headers: { "Content-Type": "text/plain" }
+    });
+    return response.data.valid;
+  } catch (error) {
+    console.error("API key validation failed:", error);
+    return false;
+  }
 };
