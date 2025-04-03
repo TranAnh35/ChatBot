@@ -2,9 +2,8 @@
 __pycache__/
 
 .env
-uploaded_files/
+upload/
 *.faiss
 *.db
 *.npy
 *.bin
-*.txt
