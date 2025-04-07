@@ -27,8 +27,8 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy the application code
-COPY . /app
+# Copy the backend application code
+COPY src/backend /app
 
 # Expose API port (8000 for FastAPI)
 EXPOSE 8000
