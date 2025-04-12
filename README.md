@@ -71,6 +71,7 @@ GEMINI_API_KEY=your_gemini_api_key
 - Thay your_gemini_api_key bằng API key thực tế của Gemini.
 
 2. Xây dựng và chạy (lần đầu)
+   
    2.1. Chạy Docker Compose:
 
    ```
