@@ -21,6 +21,7 @@ app.include_router(file_routes.router, prefix="/files", tags=["Files"])
 app.include_router(web_routes.router, prefix="/web", tags=["WebSearch"])
 app.include_router(gen_routes.router, prefix="/generate", tags=["Generative Content"])
 app.include_router(api_route.router, prefix="/api", tags=["API"])
+
 @app.get("/")
 def read_root():
     return {"message": "Welcome to Agent System"}

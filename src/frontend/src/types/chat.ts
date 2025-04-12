@@ -72,4 +72,3 @@ export interface GenerateContentResponse {
   content: string; // Nội dung phản hồi từ API
   // Thêm các trường khác nếu API trả về thêm dữ liệu
 }
-

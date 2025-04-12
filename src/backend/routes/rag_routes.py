@@ -11,6 +11,6 @@ async def rag_query(question: str):
 
 @router.post("/sync-files")
 async def sync_files():
-    """Đồng bộ dữ liệu từ uploaded_files vào VectorDB"""
+    """Đồng bộ dữ liệu từ upload vào VectorDB"""
     updated = rag_service.check_and_update_files()
     return {"message": "Files synchronized successfully" if updated else "No changes detected"}

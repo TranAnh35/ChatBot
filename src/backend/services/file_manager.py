@@ -5,7 +5,7 @@ from docx import Document
 import yaml
 from typing import List
 
-UPLOAD_FOLDER = "uploaded_files"
+UPLOAD_FOLDER = "upload"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 def save_file(file: UploadFile) -> str:
@@ -30,7 +30,7 @@ def list_files() -> List[dict]:
     return files
 
 """
-* Các file đọc nội dung từ file được lưu trong thư mục uploaded_files (sử dụng cho RAG)
+* Các file đọc nội dung từ file được lưu trong thư mục upload (sử dụng cho RAG)
 """
 
 def read_file_from_path(file_path: str) -> str:

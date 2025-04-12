@@ -1,11 +1,5 @@
 import os
 import sqlite3
-from bs4 import BeautifulSoup
-import PyPDF2
-from docx import Document
-import re
-import yaml
-from datetime import datetime
 
 class VectorDB:
     _instance = None
@@ -14,7 +8,7 @@ class VectorDB:
         if cls._instance is None:
             cls._instance = super(VectorDB, cls).__new__(cls)
             cls._instance.db_path = "vector_store.db"
-            cls._instance.uploaded_files_dir = "uploaded_files"
+            cls._instance.upload_dir = "upload"
             cls._instance.chunk_size = 1000
             cls._instance.chunk_overlap = 100
             cls._instance.current_version = 2
@@ -244,8 +238,8 @@ class VectorDB:
         except Exception as e:
             print(f"Lỗi khi xóa dữ liệu của file {file_name}: {str(e)}")
 
-    def update_from_uploaded_files(self):
-        """Đồng bộ dữ liệu từ uploaded_files vào VectorDB"""
+    def update_from_upload(self):
+        """Đồng bộ dữ liệu từ upload vào VectorDB"""
         try:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
@@ -254,22 +248,22 @@ class VectorDB:
             cursor.execute("SELECT name FROM files")
             db_files = {row[0] for row in cursor.fetchall()}
             
-            # Lấy danh sách các file trong thư mục uploaded_files
-            uploaded_files = set()
-            for file in os.listdir(self.uploaded_files_dir):
+            # Lấy danh sách các file trong thư mục upload
+            upload = set()
+            for file in os.listdir(self.upload_dir):
                 if file.endswith(('.txt', '.pdf', '.doc', '.docx', '.yaml', '.yml')):
-                    uploaded_files.add(file)
+                    upload.add(file)
             
             conn.close()
                     
             # Xóa dữ liệu của các file không còn tồn tại trong thư mục
-            files_to_delete = db_files - uploaded_files
+            files_to_delete = db_files - upload
             for file_name in files_to_delete:
                 self.delete_file_from_db(file_name)
                 
             # Cập nhật dữ liệu cho các file mới hoặc đã thay đổi
-            for file_name in uploaded_files:
-                file_path = os.path.join(self.uploaded_files_dir, file_name)
+            for file_name in upload:
+                file_path = os.path.join(self.upload_dir, file_name)
                 self.process_file(file_path)
                     
         except Exception as e:

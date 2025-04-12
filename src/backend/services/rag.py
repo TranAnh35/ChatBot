@@ -12,10 +12,10 @@ LAST_CHECK_FILE = "last_check.txt"
 
 class RAGService:
     def __init__(self):
-        self.uploaded_files_dir = "uploaded_files"
+        self.upload_dir = "upload"
+        os.makedirs(self.upload_dir, exist_ok=True)
         self.vector_db = VectorDB()
         self.model = SentenceTransformer('all-MiniLM-L6-v2')
-        self.index = None
         self.llm = LLM()
         self.chunk_id_mapping = []
         self.load_or_create_index()  # Chỉ tải hoặc tạo index, không index lại files
@@ -41,35 +41,35 @@ class RAGService:
             print(f"Lỗi khi lưu thời gian kiểm tra: {str(e)}")
 
     def check_and_update_files(self):
-        """Kiểm tra và cập nhật database nếu có thay đổi thực sự trong thư mục uploaded_files"""
+        """Kiểm tra và cập nhật database nếu có thay đổi thực sự trong thư mục upload"""
         try:
             current_time = time.time()
             should_reindex = False
             
-            files = os.listdir(self.uploaded_files_dir)
+            files = os.listdir(self.upload_dir)
             db_files = self.vector_db.get_all_files()
             db_file_names = {file[1] for file in db_files}
             db_file_dict = {file[1]: file[4] for file in db_files}
             
-            uploaded_files_info = {}
+            upload_info = {}
             for file_name in files:
-                file_path = os.path.join(self.uploaded_files_dir, file_name)
+                file_path = os.path.join(self.upload_dir, file_name)
                 if file_name.endswith(('.txt', '.pdf', '.doc', '.docx', '.yaml', '.yml')):
                     mtime = os.path.getmtime(file_path)
-                    uploaded_files_info[file_name] = mtime
+                    upload_info[file_name] = mtime
             
             new_or_modified_files = []
-            for file_name, mtime in uploaded_files_info.items():
+            for file_name, mtime in upload_info.items():
                 if file_name not in db_file_names or mtime > self.last_check_time:
                     new_or_modified_files.append(file_name)
                     should_reindex = True
             
-            deleted_files = [f for f in db_file_names if f not in uploaded_files_info]
+            deleted_files = [f for f in db_file_names if f not in upload_info]
             if deleted_files:
                 should_reindex = True
             
             if should_reindex:
-                print("Phát hiện thay đổi trong thư mục uploaded_files:")
+                print("Phát hiện thay đổi trong thư mục upload:")
                 if new_or_modified_files:
                     print(f"File mới hoặc đã sửa: {new_or_modified_files}")
                 if deleted_files:
@@ -79,7 +79,7 @@ class RAGService:
                     self.vector_db.delete_file_data(file_name)
                 
                 for file_name in new_or_modified_files:
-                    file_path = os.path.join(self.uploaded_files_dir, file_name)
+                    file_path = os.path.join(self.upload_dir, file_name)
                     try:
                         self.vector_db.process_file(file_path)
                     except Exception as e:
@@ -114,10 +114,10 @@ class RAGService:
             raise
 
     def index_files(self):
-        """Index tất cả các file trong thư mục uploaded_files"""
+        """Index tất cả các file trong thư mục upload"""
         try:
             # Lấy danh sách các file trong thư mục
-            files = os.listdir(self.uploaded_files_dir)
+            files = os.listdir(self.upload_dir)
             
             # Xóa index cũ và mapping cũ
             self.index = faiss.IndexFlatL2(self.model.get_sentence_embedding_dimension())
@@ -125,7 +125,7 @@ class RAGService:
             
             for file_name in files:
                 if file_name.endswith(('.txt', '.pdf', '.doc', '.docx', '.yaml', '.yml')):
-                    file_path = os.path.join(self.uploaded_files_dir, file_name)
+                    file_path = os.path.join(self.upload_dir, file_name)
                     try:
                         # Xử lý file với VectorDB
                         self.vector_db.process_file(file_path)
