@@ -22,9 +22,9 @@ Chương trình này bao gồm một backend (dùng FastAPI) và một frontend 
    - Tạo file .env trong thư mục src/backend/ với nội dung:
 
    ```
-   GEMINI_API_KEY=your_gemini_api_key
+   GOOGLE_API_KEY=your_GOOGLE_API_KEY
    ```
-   - Thay your_gemini_api_key bằng API key thực tế của Gemini.
+   - Thay your_GOOGLE_API_KEY bằng API key thực tế của Gemini.
 
    1.3. Chạy backend:
 
@@ -66,9 +66,9 @@ Chương trình này bao gồm một backend (dùng FastAPI) và một frontend 
 - Tạo file .env trong thư mục src/backend/ với nội dung:
 
 ```
-GEMINI_API_KEY=your_gemini_api_key
+GOOGLE_API_KEY=your_GOOGLE_API_KEY
 ```
-- Thay your_gemini_api_key bằng API key thực tế của Gemini.
+- Thay your_GOOGLE_API_KEY bằng API key thực tế của Gemini.
 
 2. Xây dựng và chạy (lần đầu)
    

@@ -6,7 +6,7 @@ load_dotenv()
 
 class LLM:
     def __init__(self):
-        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+        genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
         self.model = genai.GenerativeModel("gemini-2.0-flash")
 
     async def generateContent(self, prompt: str, rag_response: str = None, web_response: str = None, file_response: str = None) -> str:

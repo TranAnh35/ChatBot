@@ -5,15 +5,15 @@ load_dotenv()
 
 class ApiManager:
     def __init__(self):
-        self.api_key = os.getenv("GEMINI_API_KEY")
+        self.api_key = os.getenv("GOOGLE_API_KEY")
 
     def get_api_key(self):
         return self.api_key
 
     def set_api_key(self, api_key):
         self.api_key = api_key
-        os.environ["GEMINI_API_KEY"] = api_key
-        set_key(".env", "GEMINI_API_KEY", api_key)
+        os.environ["GOOGLE_API_KEY"] = api_key
+        set_key(".env", "GOOGLE_API_KEY", api_key)
         
     def is_api_key_valid(self, api_key: str) -> bool: 
         """
