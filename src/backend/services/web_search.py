@@ -43,8 +43,6 @@ class WebSearch:
         # Thêm thông số để yêu cầu kết quả an toàn
         url += "&safe=active"
         
-        print(f"Tìm kiếm URL: {url}")
-        
         # Thử tìm kiếm với thử lại trong trường hợp lỗi mạng tạm thời
         max_retries = 3
         retry_count = 0
@@ -52,7 +50,6 @@ class WebSearch:
         while retry_count < max_retries:
             try:
                 response = requests.get(url, timeout=10)
-                print(f"Mã trạng thái phản hồi: {response.status_code}")
                 
                 if response.status_code == 200:
                     data = response.json()
@@ -62,7 +59,7 @@ class WebSearch:
                         print(f"Không tìm thấy kết quả cho '{query}'")
                         return []
                     
-                    items = data.get("items", [])[:num_results]
+                    items = data.get("items", [])
                     results = []
                     
                     for item in items:
@@ -126,9 +123,7 @@ class WebSearch:
         
         try:
             response_text = await llm.generateContent(analysis_prompt)
-            print(f"response_text: {response_text}")
             json_results = text_processing.split_JSON_text(response_text)
-            print(f"json_results: {json_results}")
             if json_results and len(json_results) > 0:
                 return json_results[0]
             else:
@@ -188,14 +183,13 @@ class WebSearch:
             # Thêm một kết quả từ truy vấn thay thế nếu có
             if alternative_queries:
                 results.append(await self.search(alternative_queries[0], num_results=1))
-        
-        print(f"results: {results}")
+
         # Làm phẳng danh sách kết quả
         flat_results = []
         for result_group in results:
             flat_results.extend(result_group)
-        
-        return flat_results
+
+        return [flat_results]
         
     async def get_page_content(self, url: str) -> Dict[str, str]:
         """Lấy nội dung từ một trang web dựa trên URL được cung cấp."""
