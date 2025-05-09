@@ -21,7 +21,7 @@ Pillow
 
 python-multipart
 pydantic
-PyPDF2
+docling
 python-docx
 PyYAML
 

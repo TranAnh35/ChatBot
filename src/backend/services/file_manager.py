@@ -1,9 +1,10 @@
 import os
 from fastapi import UploadFile
-import PyPDF2
+from docling.document_converter import DocumentConverter
 from docx import Document
 import yaml
 from typing import List
+import io
 
 UPLOAD_FOLDER = "upload"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -49,12 +50,15 @@ def read_file_from_path(file_path: str) -> str:
             return f.read()
 
 def read_pdf_from_path(file_path: str) -> str:
-    with open(file_path, 'rb') as file:
-        pdf_reader = PyPDF2.PdfReader(file)
-        text = ""
-        for page in pdf_reader.pages:
-            text += page.extract_text() + "\n"
-        return text
+    """Đọc nội dung từ file PDF với khả năng xử lý PDF phức tạp sử dụng docling."""
+    try:
+        # Sử dụng docling DocumentConverter để trích xuất văn bản
+        converter = DocumentConverter()
+        result = converter.convert(file_path)
+        return result.document.export_to_markdown()
+    except Exception as e:
+        print(f"Lỗi khi sử dụng docling: {str(e)}.")
+        raise Exception(f"Không thể đọc file PDF: {str(e)}")
 
 def read_docx_from_path(file_path: str) -> str:
     doc = Document(file_path)
@@ -99,12 +103,28 @@ async def read_uploaded_file(file: UploadFile) -> str:
         await file.close()  # Đóng file sau khi đọc
 
 async def read_pdf_from_upload(file: UploadFile) -> str:
-    """Đọc nội dung file PDF từ UploadFile."""
-    pdf_reader = PyPDF2.PdfReader(file.file)
-    text = ""
-    for page in pdf_reader.pages:
-        text += page.extract_text() + "\n"
-    return text
+    """Đọc nội dung file PDF từ UploadFile với docling."""
+    try:
+        # Đọc nội dung file
+        file_content = await file.read()
+        
+        # Lưu tạm vào file tạm thời để docling xử lý
+        temp_file_path = os.path.join(UPLOAD_FOLDER, "temp_" + file.filename)
+        with open(temp_file_path, "wb") as temp_file:
+            temp_file.write(file_content)
+        
+        # Sử dụng docling
+        converter = DocumentConverter()
+        result = converter.convert(temp_file_path)
+        text = result.document.export_to_markdown()
+        
+        # Xóa file tạm
+        os.remove(temp_file_path)
+        
+        return text
+    except Exception as e:
+        print(f"Lỗi khi sử dụng docling: {str(e)}.")
+        raise Exception(f"Không thể đọc file PDF: {str(e)}")
 
 async def read_docx_from_upload(file: UploadFile) -> str:
     """Đọc nội dung file DOCX từ UploadFile."""
