@@ -19,7 +19,7 @@ class ApiManager:
         """
         Kiểm tra xem API key của Gemini có hợp lệ không bằng cách gửi một yêu cầu thử nghiệm.
         """
-        url = "https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent"
+        url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=" + api_key
         headers = {"Content-Type": "application/json"}
         payload = {
             "contents": [{"parts": [{"text": "Hello"}]}],  # Prompt thử nghiệm
