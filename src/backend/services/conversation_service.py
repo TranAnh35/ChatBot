@@ -10,7 +10,7 @@ class ConversationService:
         return self.conversation_model.create_conversation(user_id)
     
     def add_message(self, conversation_id: str, role: str, content: str) -> bool:
-        """Add a message to the conversation"""
+        """Add a message to a conversation"""
         return self.conversation_model.add_message(conversation_id, role, content)
     
     def get_conversation(self, conversation_id: str) -> Optional[Dict]:
@@ -28,6 +28,10 @@ class ConversationService:
     def delete_conversation(self, conversation_id: str) -> bool:
         """Delete a conversation"""
         return self.conversation_model.delete_conversation(conversation_id)
+    
+    def rename_conversation(self, conversation_id: str, title: str) -> bool:
+        """Rename a conversation"""
+        return self.conversation_model.rename_conversation(conversation_id, title)
     
     def format_conversation_for_context(self, conversation_id: str, max_messages: int = 5) -> str:
         """Format conversation history for inclusion in LLM context"""

@@ -135,3 +135,11 @@ export const deleteConversation = async (conversationId: string): Promise<boolea
   const response = await api.delete<{ success: boolean }>(`/conversations/${conversationId}`);
   return response.data.success;
 };
+
+export const renameConversation = async (conversationId: string, title: string): Promise<boolean> => {
+  const response = await api.post<{ success: boolean }>('/conversations/rename', {
+    conversation_id: conversationId,
+    title: title
+  });
+  return response.data.success;
+};

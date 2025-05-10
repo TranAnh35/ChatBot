@@ -18,6 +18,10 @@ class MessageCreate(BaseModel):
     role: str
     content: str
 
+class ConversationRename(BaseModel):
+    conversation_id: str
+    title: str
+
 @router.post("/create")
 async def create_conversation(request: ConversationCreate):
     """Create a new conversation"""
@@ -31,6 +35,17 @@ async def add_message(request: MessageCreate):
         request.conversation_id, 
         request.role, 
         request.content
+    )
+    if not success:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    return {"success": True}
+
+@router.post("/rename")
+async def rename_conversation(request: ConversationRename):
+    """Rename a conversation"""
+    success = conversation_service.rename_conversation(
+        request.conversation_id,
+        request.title
     )
     if not success:
         raise HTTPException(status_code=404, detail="Conversation not found")

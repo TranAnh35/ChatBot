@@ -82,6 +82,7 @@ export interface GenerateContentResponse {
 export interface Conversation {
   conversation_id: string;
   user_id: string;
+  title?: string; // Tiêu đề cuộc trò chuyện
   created_at: string;
   updated_at: string;
   preview?: string;
@@ -95,5 +96,6 @@ export interface ConversationSidebarProps {
   onConversationSelect: (conversationId: string) => void;
   onCreateNewConversation: () => void;
   onDeleteConversation: (conversationId: string) => void;
+  onRenameConversation?: (conversationId: string, title: string) => void;
   isLoading: boolean;
 }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { ChatBoxProps, Message, Conversation } from '../../types/chat';
-import { generateContent, createConversation, getConversationHistory, listUserConversations, deleteConversation } from '../../services/api';
+import { generateContent, createConversation, getConversationHistory, listUserConversations, deleteConversation, renameConversation } from '../../services/api';
 import MessageList from './MessageList';
 import ChatInput from './ChatInput';
 import FileSelector from './FileSelector';
@@ -121,6 +121,27 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
       onCloseConversations();
     }
   }, [onCloseConversations]);
+
+  const handleRenameConversation = useCallback(async (conversationId: string, title: string) => {
+    try {
+      const success = await renameConversation(conversationId, title);
+      if (success) {
+        loadConversations(); // Tải lại danh sách để cập nhật tiêu đề mới
+        enqueueSnackbar('Đã đổi tên cuộc trò chuyện', { 
+          variant: 'success',
+        });
+      } else {
+        enqueueSnackbar('Không thể đổi tên cuộc trò chuyện', { 
+          variant: 'error',
+        });
+      }
+    } catch (error) {
+      console.error('Error renaming conversation:', error);
+      enqueueSnackbar('Lỗi khi đổi tên cuộc trò chuyện', { 
+        variant: 'error',
+      });
+    }
+  }, [loadConversations, enqueueSnackbar]);
 
   const handleDeleteConversation = useCallback(async (conversationId: string) => {
     try {
@@ -275,6 +296,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
         onConversationSelect={handleConversationSelect}
         onCreateNewConversation={handleCreateNewConversation}
         onDeleteConversation={handleDeleteConversation}
+        onRenameConversation={handleRenameConversation}
         isLoading={isConversationsLoading}
         isOpen={showConversations || false}
         onClose={onCloseConversations || (() => {})}

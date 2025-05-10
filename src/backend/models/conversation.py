@@ -15,6 +15,7 @@ class Conversation:
         conversation_data = {
             "conversation_id": conversation_id,
             "user_id": user_id,
+            "title": "Cuộc trò chuyện mới",  # Thêm tiêu đề mặc định
             "messages": [],
             "created_at": datetime.now().isoformat(),
             "updated_at": datetime.now().isoformat()
@@ -36,6 +37,24 @@ class Conversation:
         }
         
         conversation["messages"].append(message)
+        conversation["updated_at"] = datetime.now().isoformat()
+        
+        # Nếu chưa có tiêu đề tùy chỉnh (vẫn là tiêu đề mặc định) 
+        # và đây là tin nhắn đầu tiên của người dùng, đặt tiêu đề dựa trên nội dung
+        if conversation.get("title") == "Cuộc trò chuyện mới" and role == "user" and len(conversation["messages"]) <= 2:
+            # Lấy 30 ký tự đầu tiên của tin nhắn để làm tiêu đề
+            conversation["title"] = content[:30] + ("..." if len(content) > 30 else "")
+        
+        self._save_conversation(conversation_id, conversation)
+        return True
+    
+    def rename_conversation(self, conversation_id: str, title: str) -> bool:
+        """Rename a conversation"""
+        conversation = self._load_conversation(conversation_id)
+        if not conversation:
+            return False
+        
+        conversation["title"] = title
         conversation["updated_at"] = datetime.now().isoformat()
         
         self._save_conversation(conversation_id, conversation)
