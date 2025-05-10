@@ -7,12 +7,28 @@ import { SettingsModal } from './components/Settings/SettingsModal';
 function App() {
   const [showUploader, setShowUploader] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showConversations, setShowConversations] = useState(false);
   const [apiKey, setApiKey] = useState('');
+
+  const handleConversationsClick = () => {
+    setShowConversations(true);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header onUploadClick={() => setShowUploader(true)} onSettingsClick={() => setShowSettings(true)}/>
-      <ChatBox uploadedFiles={[]} selectedFiles={[]} onFileSelect={() => {}} onUploadClick={() => {}} />
+      <Header 
+        onUploadClick={() => setShowUploader(true)} 
+        onSettingsClick={() => setShowSettings(true)}
+        onConversationsClick={handleConversationsClick}
+      />
+      <ChatBox 
+        uploadedFiles={[]} 
+        selectedFiles={[]} 
+        onFileSelect={() => {}} 
+        onUploadClick={() => {}}
+        showConversations={showConversations}
+        onCloseConversations={() => setShowConversations(false)}
+      />
       
       {showUploader && (
         <DocumentUploader
