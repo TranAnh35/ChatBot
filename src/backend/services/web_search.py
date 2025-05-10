@@ -165,10 +165,10 @@ class WebSearch:
         # Chiến lược tìm kiếm dựa trên loại truy vấn
         if query_type in ["news", "recent"]:
             # Tin tức ưu tiên nội dung gần đây
-            results.append(await self.search(main_query, num_results=3, filter_by=time_filter or "w1"))
+            results.append(await self.search(main_query, num_results=1, filter_by=time_filter or "w1"))
         elif query_type == "technical":
             # Truy vấn kỹ thuật ưu tiên độ chính xác và mức độ chuyên sâu
-            results.append(await self.search(main_query, num_results=3))
+            results.append(await self.search(main_query, num_results=2))
             if domain_specific:
                 results.append(await self.search(main_query, num_results=2, site_restrict=domain_specific))
         elif query_type == "comparison":
@@ -179,7 +179,7 @@ class WebSearch:
                 results.append(await self.search(alt_query, num_results=1))
         else:
             # Truy vấn thông thường
-            results.append(await self.search(main_query, num_results=3, filter_by=time_filter))
+            results.append(await self.search(main_query, num_results=1, filter_by=time_filter))
             # Thêm một kết quả từ truy vấn thay thế nếu có
             if alternative_queries:
                 results.append(await self.search(alternative_queries[0], num_results=1))
