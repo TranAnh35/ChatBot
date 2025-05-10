@@ -1,7 +1,7 @@
 from fastapi import FastAPI, UploadFile, File, Form
 from typing import List
 from fastapi.middleware.cors import CORSMiddleware
-from routes import rag_routes, gen_routes, file_routes, web_routes, api_route
+from routes import rag_routes, gen_routes, file_routes, web_routes, api_route, conversation_routes
 
 
 app = FastAPI(title="Agent System")
@@ -21,6 +21,7 @@ app.include_router(file_routes.router, prefix="/files", tags=["Files"])
 app.include_router(web_routes.router, prefix="/web", tags=["WebSearch"])
 app.include_router(gen_routes.router, prefix="/generate", tags=["Generative Content"])
 app.include_router(api_route.router, prefix="/api", tags=["API"])
+app.include_router(conversation_routes.router, prefix="/conversations", tags=["Conversations"])
 
 @app.get("/")
 def read_root():

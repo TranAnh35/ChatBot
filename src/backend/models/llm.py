@@ -1,7 +1,7 @@
 import google.generativeai as genai
 from dotenv import load_dotenv
 import os
-from typing import List, Dict
+from typing import List, Dict, Optional
 load_dotenv()
 
 class LLM:
@@ -34,7 +34,8 @@ Khi cung cấp câu trả lời:
 Bạn được thiết kế để giúp đỡ trong các lĩnh vực từ giáo dục, công việc đến giải trí và đời sống hàng ngày, nhưng luôn tuân thủ các nguyên tắc đạo đức và pháp luật.
 """
 
-    async def generateContent(self, prompt: str, rag_response: str = None, web_response: str = None, file_response: str = None) -> str:
+    async def generateContent(self, prompt: str, rag_response: str = None, web_response: str = None, 
+                             file_response: str = None, conversation_history: str = None) -> str:
         """Tạo nội dung từ prompt và thông tin từ RAG"""
         try:
             analysis_response = await self.analyze_communication_context(prompt)
@@ -44,6 +45,13 @@ Bạn được thiết kế để giúp đỡ trong các lĩnh vực từ giáo 
 Dựa trên thông tin sau đây, hãy trả lời câu hỏi một cách tự nhiên và đầy đủ:
             """
 
+            # Thêm lịch sử hội thoại nếu có
+            if conversation_history is not None:
+                combined_prompt += f"""
+                Lịch sử hội thoại:
+                {conversation_history}
+                """
+            
             # Thêm thông tin từ tài liệu nếu rag_response không phải None
             if rag_response is not None:
                 combined_prompt += f"""
@@ -71,7 +79,7 @@ Dựa trên thông tin sau đây, hãy trả lời câu hỏi một cách tự n
             Kết quả phân tích prompt:
             {analysis_response}
 
-            Hãy dựa vào kết quả phân tích prompt, kết hợp thông tin từ tài liệu RAG, web và file đính kèm (nếu có) với kiến thức của bạn để trả lời câu hỏi.
+            Hãy dựa vào kết quả phân tích prompt, lịch sử hội thoại (nếu có), kết hợp thông tin từ tài liệu RAG, web và file đính kèm (nếu có) với kiến thức của bạn để trả lời câu hỏi.
             Người dùng không cần quan tâm đến các thông tin phân tích prompt, chỉ cần trả lời câu hỏi một cách tự nhiên và đầy đủ."""
             
             # Gọi API để tạo nội dung
