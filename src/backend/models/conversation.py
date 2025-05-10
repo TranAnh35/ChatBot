@@ -5,7 +5,7 @@ from datetime import datetime
 
 class Conversation:
     def __init__(self):
-        self.storage_dir = "src/backend/storage/conversations"
+        self.storage_dir = "storage/conversations"
         # Ensure storage directory exists
         os.makedirs(self.storage_dir, exist_ok=True)
     
