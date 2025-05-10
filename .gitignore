@@ -177,3 +177,5 @@ cython_debug/
 *.db
 *.npy
 *.bin
+
+src/backend/storage/conversations/*
