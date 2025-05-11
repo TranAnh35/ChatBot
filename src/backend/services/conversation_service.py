@@ -39,10 +39,19 @@ class ConversationService:
         if not messages:
             return ""
         
-        formatted_history = "Đoạn hội thoại gần đây nhất:\n\n"
+        # Tối ưu độ dài lịch sử hội thoại
+        # Nếu có quá nhiều tin nhắn, giảm số lượng và độ dài nội dung
+        if len(messages) > 3:
+            # Nén các tin nhắn cũ hơn, chỉ giữ những tin nhắn gần đây đầy đủ
+            for i in range(len(messages) - 3):
+                # Giới hạn độ dài tin nhắn cũ hơn để tiết kiệm token
+                if len(messages[i]["content"]) > 100:
+                    messages[i]["content"] = messages[i]["content"][:100] + "..."
         
+        # Sử dụng định dạng ngắn gọn cho lịch sử hội thoại
+        formatted_history = ""
         for message in messages:
-            role_label = "Người dùng" if message["role"] == "user" else "Trợ lý"
-            formatted_history += f"{role_label}: {message['content']}\n\n"
+            role_prefix = "U" if message["role"] == "user" else "A"
+            formatted_history += f"{role_prefix}: {message['content']}\n"
         
         return formatted_history 

@@ -102,47 +102,68 @@ class WebSearch:
     async def extract_search_keywords(self, prompt: str) -> Dict[str, Union[str, List[str]]]:
         """Trích xuất từ khóa và ngữ cảnh tìm kiếm từ prompt người dùng."""
         
-        llm = LLM()
-        analysis_prompt = f"""
-        Hãy phân tích câu hỏi sau và trích xuất các từ khóa tìm kiếm hiệu quả:
+        # Thực hiện phân tích cục bộ trước khi gọi LLM
+        # Tiết kiệm token bằng cách xác định trước một số trường hợp cơ bản
+        simple_time_keywords = {
+            "hôm nay": "very_recent", 
+            "gần đây": "recent",
+            "mới nhất": "recent",
+            "tuần này": "recent",
+            "tháng này": "recent",
+            "năm nay": "recent"
+        }
         
-        Câu hỏi: "{prompt}"
+        time_relevance = "none"
+        for keyword, value in simple_time_keywords.items():
+            if keyword in prompt.lower():
+                time_relevance = value
+                break
+                
+        # Xác định domain cụ thể từ URL trong prompt
+        domain_specific = None
+        url_pattern = re.compile(r'https?://(?:www\.)?([a-zA-Z0-9.-]+)(?:/|$)')
+        url_match = url_pattern.search(prompt)
+        if url_match:
+            domain_specific = url_match.group(1)
+            
+        # Chỉ sử dụng LLM khi cần phân tích phức tạp
+        if len(prompt) > 10 and ("?" in prompt or any(x in prompt.lower() for x in ["so sánh", "tìm", "nghiên cứu"])):
+            llm = LLM()
+            # Prompt ngắn gọn hơn, tập trung vào yêu cầu cụ thể
+            analysis_prompt = f"""Phân tích câu hỏi: "{prompt}"
+                Trả về JSON ngắn gọn:
+                {{
+                "main_query": "câu truy vấn chính, ngắn gọn",
+                "alternative_queries": ["truy vấn thay thế 1", "truy vấn thay thế 2"],
+                "query_type": "factual|technical|opinion|news|comparison"
+                }}
+            """
+            
+            from services.text_processing import TextProcessing
+            text_processing = TextProcessing()
+            
+            try:
+                response_text = await llm.generateContent(analysis_prompt)
+                json_results = text_processing.split_JSON_text(response_text)
+                if json_results and len(json_results) > 0:
+                    # Cập nhật kết quả với phân tích cục bộ
+                    result = json_results[0]
+                    if time_relevance != "none":
+                        result["time_relevance"] = time_relevance
+                    if domain_specific:
+                        result["domain_specific"] = domain_specific
+                    return result
+            except Exception as e:
+                print(f"Lỗi khi trích xuất từ khóa: {e}")
         
-        Hãy trả về kết quả BẮT BUỘC theo định dạng JSON. Không được trả về kết quả khác:
-        {{
-            "main_query": "câu truy vấn chính, ngắn gọn, chứa từ khóa quan trọng nhất",
-            "alternative_queries": ["truy vấn thay thế 1", "truy vấn thay thế 2"],
-            "time_relevance": "none|recent|very_recent",
-            "domain_specific": "tên miền cụ thể nếu câu hỏi liên quan đến một trang web nhất định, hoặc null",
-            "query_type": "factual|technical|opinion|news|comparison"
-        }}
-        """
-        
-        from services.text_processing import TextProcessing
-        text_processing = TextProcessing()
-        
-        try:
-            response_text = await llm.generateContent(analysis_prompt)
-            json_results = text_processing.split_JSON_text(response_text)
-            if json_results and len(json_results) > 0:
-                return json_results[0]
-            else:
-                return {
-                    "main_query": prompt,
-                    "alternative_queries": [],
-                    "time_relevance": "none",
-                    "domain_specific": None,
-                    "query_type": "factual"
-                }
-        except Exception as e:
-            print(f"Lỗi khi trích xuất từ khóa: {e}")
-            return {
-                "main_query": prompt,
-                "alternative_queries": [],
-                "time_relevance": "none",
-                "domain_specific": None,
-                "query_type": "factual"
-            }
+        # Trả về phân tích cơ bản nếu LLM không thành công hoặc không cần thiết
+        return {
+            "main_query": prompt,
+            "alternative_queries": [],
+            "time_relevance": time_relevance,
+            "domain_specific": domain_specific,
+            "query_type": "factual"
+        }
     
     async def perform_search(self, prompt: str) -> List[Dict]:
         """Thực hiện tìm kiếm thông minh dựa trên phân tích prompt."""
