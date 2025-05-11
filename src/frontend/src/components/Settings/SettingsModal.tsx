@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
-import { X } from 'lucide-react';
+import { X, Check } from 'lucide-react';
 import { Button } from '../ui/button';
 import { setApiKey, validateApiKey } from '../../services/api';
 import { SettingsModalProps } from '../../types/uath';
@@ -13,7 +13,35 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 }) => {
   const [newApiKey, setNewApiKey] = useState(apiKey);
   const [error, setError] = useState<string | null>(null);
+  const [isValidating, setIsValidating] = useState(false);
+  const [isValid, setIsValid] = useState<boolean | null>(null);
   const { enqueueSnackbar } = useSnackbar();
+
+  const handleCheck = async () => {
+    if (!newApiKey.trim()) {
+      enqueueSnackbar("API key cannot be empty", { variant: "error", autoHideDuration: 3000 });
+      return;
+    }
+    
+    setIsValidating(true);
+    setIsValid(null);
+    
+    try {
+      const valid = await validateApiKey(newApiKey);
+      setIsValid(valid);
+      
+      if (valid) {
+        enqueueSnackbar("API key is valid", { variant: "success", autoHideDuration: 3000 });
+      } else {
+        enqueueSnackbar("API key is invalid. Please check and try again.", { variant: "error", autoHideDuration: 3000 });
+      }
+    } catch (err) {
+      enqueueSnackbar("Failed to validate API key", { variant: "error", autoHideDuration: 3000 });
+      setIsValid(false);
+    } finally {
+      setIsValidating(false);
+    }
+  };
 
   const handleSave = async () => {
     setError(null); // Reset lỗi trước khi kiểm tra
@@ -62,17 +90,39 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <label htmlFor="apiKey" className="block text-sm font-medium text-gray-700 mb-1">
                 API Key
               </label>
-              <input
-                id="apiKey"
-                type="password"
-                value={newApiKey}
-                onChange={(e) => setNewApiKey(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Enter your API key"
-              />
+              <div className="flex space-x-2">
+                <input
+                  id="apiKey"
+                  type="password"
+                  value={newApiKey}
+                  onChange={(e) => {
+                    setNewApiKey(e.target.value);
+                    setIsValid(null); // Reset validation state when input changes
+                  }}
+                  className={`flex-1 px-3 py-2 border ${
+                    isValid === true ? 'border-green-500' : 
+                    isValid === false ? 'border-red-500' : 
+                    'border-gray-300'
+                  } rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                  placeholder="Enter your API key"
+                />
+                <Button 
+                  onClick={handleCheck} 
+                  disabled={isValidating} 
+                  className="whitespace-nowrap"
+                  variant="outline"
+                >
+                  {isValidating ? 'Checking...' : 'Check'}
+                </Button>
+              </div>
               <p className="mt-1 text-sm text-gray-500">
                 Your API key is stored securely in local storage
               </p>
+              {isValid === true && (
+                <p className="mt-1 text-sm text-green-500 flex items-center">
+                  <Check className="h-4 w-4 mr-1" /> API key is valid
+                </p>
+              )}
               {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
             </div>
 
