@@ -1,6 +1,7 @@
 from models.llm import LLM
 from typing import List, Dict
 from services.conversation_service import ConversationService
+import faiss
 
 class GeneratorService:
     def __init__(self):
@@ -58,3 +59,8 @@ class GeneratorService:
     
     async def merge_context(self, web_results: List[List[Dict]]):
         return await self.llm.merge_context(web_results)
+
+    def create_vector_index(self):
+        # During index creation, use HNSW instead of FlatL2
+        vector_size = self.model.get_sentence_embedding_dimension()
+        self.index = faiss.IndexHNSWFlat(vector_size, 32)  # 32 is M parameter for HNSW
