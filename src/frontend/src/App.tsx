@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Header } from './components/Layouts/Header';
-import { ChatBox } from './components/Chat/ChatBox';
+import { ChatBot } from './components/Chat/ChatBot';
 import { DocumentUploader } from './components/DocumentUploader';
 import { SettingsModal } from './components/Settings/SettingsModal';
 
@@ -21,7 +21,7 @@ function App() {
         onSettingsClick={() => setShowSettings(true)}
         onConversationsClick={handleConversationsClick}
       />
-      <ChatBox 
+      <ChatBot 
         uploadedFiles={[]} 
         selectedFiles={[]} 
         onFileSelect={() => {}} 

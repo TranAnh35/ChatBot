@@ -10,7 +10,7 @@ class LLM:
         self.model = genai.GenerativeModel("gemini-2.0-flash")
         
         # Định nghĩa system prompt
-        self.system_prompt = """Bạn là ChatBox, một trợ lý AI thông minh được phát triển để hỗ trợ người dùng một cách toàn diện và chuyên nghiệp.
+        self.system_prompt = """Bạn là ChatBot, một trợ lý AI thông minh được phát triển để hỗ trợ người dùng một cách toàn diện và chuyên nghiệp.
 
             Nguyên tắc hoạt động:
             1. Luôn cung cấp thông tin chính xác, đáng tin cậy và cập nhật.

@@ -30,13 +30,13 @@ export interface MessageContentProps {
 }
 
 export interface FileSelectorProps {
-  uploadedFiles: ChatBoxProps['uploadedFiles'];
-  selectedFiles: ChatBoxProps['selectedFiles'];
-  onFileSelect: ChatBoxProps['onFileSelect'];
+  uploadedFiles: ChatBotProps['uploadedFiles'];
+  selectedFiles: ChatBotProps['selectedFiles'];
+  onFileSelect: ChatBotProps['onFileSelect'];
   onClose: () => void;
 }
 
-export interface ChatBoxProps {
+export interface ChatBotProps {
   uploadedFiles: UploadedFile[];
   selectedFiles: UploadedFile[];
   onFileSelect: (file: UploadedFile) => void;

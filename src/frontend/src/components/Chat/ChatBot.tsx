@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ChatBoxProps, Message, Conversation } from '../../types/chat';
+import { ChatBotProps, Message, Conversation } from '../../types/chat';
 import { generateContent, createConversation, getConversationHistory, listUserConversations, deleteConversation, renameConversation } from '../../services/api';
 import MessageList from './MessageList';
 import ChatInput from './ChatInput';
@@ -14,7 +14,7 @@ import { useSnackbar } from 'notistack';
 // Vì không có hệ thống đăng nhập, chúng ta sẽ sử dụng một ID cố định cho tất cả cuộc trò chuyện
 const DEFAULT_USER_ID = "default_user";
 
-export const ChatBox: React.FC<ChatBoxProps> = ({ 
+export const ChatBot: React.FC<ChatBotProps> = ({ 
   uploadedFiles, 
   selectedFiles, 
   onFileSelect,
