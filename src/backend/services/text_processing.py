@@ -1,11 +1,28 @@
 import re
 import json
+from typing import List, Dict, Any
 
 class TextProcessing:
-    """Xử lý văn bản: làm sạch, phân tích, chuyển đổi"""
+    """Xử lý văn bản với các chức năng làm sạch, phân tích và chuyển đổi."""
 
-    def split_JSON_text(self, text: str) -> list:
-        """Trong text có chứa JSON, hãy tách ra thành một list các JSON"""
+    def split_JSON_text(self, text: str) -> List[Dict[str, Any]]:
+        """Tách văn bản chứa JSON thành danh sách các đối tượng JSON.
+        
+        Args:
+            text (str): Chuỗi văn bản chứa các đối tượng JSON cần trích xuất.
+            
+        Returns:
+            List[Dict[str, Any]]: Danh sách các đối tượng JSON được trích xuất từ văn bản.
+            
+        Raises:
+            Exception: Nếu có lỗi xảy ra trong quá trình phân tích cú pháp JSON.
+            
+        Example:
+            >>> tp = TextProcessing()
+            >>> result = tp.split_JSON_text('abc{"key": "value"}def{"another": 123}')
+            >>> print(result)
+            [{'key': 'value'}, {'another': 123}]
+        """
         try:
             # Tách text thành các đoạn JSON
             json_blocks = re.findall(r'\{[^{}]*\}', text)

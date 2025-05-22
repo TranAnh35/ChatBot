@@ -1,0 +1,1 @@
+# Để trống, sẽ bổ sung schema nếu cần trong tương lai. 
