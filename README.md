@@ -1,4 +1,37 @@
-# Giới thiệu
+# Mô tả dự án
+ChatBot là một chatbot thông minh được xây dựng với mục tiêu hỗ trợ người dùng thông qua giao diện web đơn giản, dễ sử dụng. Dự án tích hợp Gemini API để cung cấp khả năng xử lý ngôn ngữ tự nhiên vượt trội, có thể triển khai nhanh chóng cả cục bộ và trên môi trường Docker.
+
+# Tính năng chính
+## Chatbot trả lời thông minh
+
+Tích hợp Gemini API để xử lý câu hỏi phức tạp.
+
+Hỗ trợ trả lời tự động 24/7.
+
+Giao tiếp mượt mà qua frontend đơn giản, dễ sử dụng.
+
+## Giao diện người dùng thân thiện
+
+Giao diện web hiện đại (sử dụng Node.js + Vite)
+
+## Cấu hình linh hoạt
+
+Hỗ trợ chạy cục bộ (local) hoặc qua Docker
+
+Dễ dàng tích hợp vào hệ thống lớn hơn
+
+## Công nghệ sử dụng
+Backend: FastAPI (Python 3.10+)
+
+Frontend: Node.js 18+, Vite
+
+AI API: Gemini (Google)
+
+Triển khai: Docker, Docker Compose
+
+Giao tiếp giữa frontend và backend: RESTful API
+
+## Tổng quan
 Chương trình này bao gồm một backend (dùng FastAPI) và một frontend (dùng Node.js). Bạn có thể chạy chương trình theo hai cách: cục bộ (local) hoặc sử dụng Docker. Hãy làm theo các bước dưới đây để thiết lập và khởi động.
 
 # Yêu cầu
