@@ -20,6 +20,46 @@ async def sync_files():
         else "Không có thay đổi nào được phát hiện"
     }
 
+@router.post("/force-rebuild", response_model=Dict[str, Any])
+async def force_rebuild_from_files():
+    """Force rebuild toàn bộ database và index từ file upload (dùng khi database bị xóa)."""
+    try:
+        from utils.rag_file_utils import get_uploaded_files_info
+        upload_info = get_uploaded_files_info(rag_service.upload_dir)
+        
+        if not upload_info:
+            return {
+                "status": "warning",
+                "message": "Không có file nào trong thư mục upload để rebuild",
+                "files_processed": 0
+            }
+        
+        files_processed = 0
+        for file_name in upload_info.keys():
+            try:
+                file_path = f"{rag_service.upload_dir}/{file_name}"
+                await rag_service.vector_db.process_file(file_path)
+                files_processed += 1
+            except Exception as e:
+                print(f"Lỗi khi xử lý file {file_name}: {str(e)}")
+        
+        if files_processed > 0:
+            await rag_service._rebuild_index_from_database()
+        
+        return {
+            "status": "success",
+            "message": f"Đã rebuild thành công database từ {files_processed} file upload",
+            "files_processed": files_processed,
+            "total_files_found": len(upload_info)
+        }
+        
+    except Exception as e:
+        return {
+            "status": "error", 
+            "message": f"Lỗi khi rebuild database: {str(e)}",
+            "files_processed": 0
+        }
+
 @router.post("/rebuild-index", response_model=Dict[str, str])
 async def rebuild_index():
     """Xây dựng lại FAISS index từ dữ liệu trong database."""

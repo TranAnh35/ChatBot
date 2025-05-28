@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from .schemas import ConversationCreate, MessageCreate, ConversationRename
 from services.conversation.service import ConversationService
+from services.vector_db.database_manager import DatabaseManager
 from typing import List, Dict, Any
 
 router = APIRouter()
@@ -62,3 +63,51 @@ async def delete_conversation(conversation_id: str):
     if not success:
         raise HTTPException(status_code=404, detail="Không tìm thấy hội thoại")
     return {"success": True}
+
+@router.get("/user/{user_id}/stats", response_model=Dict[str, Any])
+async def get_user_conversation_stats(user_id: str):
+    """Lấy thống kê conversations của user."""
+    stats = conversation_service.get_conversation_stats(user_id)
+    return {"stats": stats}
+
+@router.post("/migrate-from-json", response_model=Dict[str, Any])
+async def migrate_conversations_from_json():
+    """Migration conversations từ JSON files sang database."""
+    try:
+        result = conversation_service.migrate_from_json_files()
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Lỗi migration: {str(e)}")
+
+@router.get("/database/status", response_model=Dict[str, Any])
+async def get_database_status():
+    """Kiểm tra trạng thái database và khả năng kết nối."""
+    try:
+        # Test connection bằng cách lấy stats của user test
+        test_stats = conversation_service.get_conversation_stats("test_user")
+        return {
+            "status": "connected",
+            "message": "Database hoạt động bình thường",
+            "database_type": "SQLite",
+            "test_query_success": True
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"Lỗi kết nối database: {str(e)}",
+            "database_type": "SQLite",
+            "test_query_success": False
+        }
+
+@router.get("/database/info", response_model=Dict[str, Any])
+async def get_database_info():
+    """Lấy thông tin chi tiết về database."""
+    try:
+        db_manager = DatabaseManager()
+        db_info = db_manager.get_database_info()
+        return {
+            "status": "success",
+            "database_info": db_info
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Lỗi khi lấy thông tin database: {str(e)}")
