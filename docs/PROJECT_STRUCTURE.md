@@ -7,7 +7,6 @@ ChatBot/
 ├── docker-compose.yml          # Cấu hình Docker Compose
 ├── requirements.txt            # Dependencies Python cho backend
 ├── README.md                   # Tài liệu tổng quan dự án
-├── LICENSE                     # Giấy phép MIT
 ├── .gitignore                  # Git ignore rules
 ├── .dockerignore              # Docker ignore rules
 │
@@ -18,7 +17,6 @@ ChatBot/
 │   │   ├── api/
 │   │   │   └── API_REFERENCE.md  # Tài liệu API
 │   │   └── USER_GUIDE.md      # Hướng dẫn sử dụng
-│   ├── CONTRIBUTION.md        # Hướng dẫn đóng góp
 │   └── PROJECT_STRUCTURE.md   # File hiện tại
 │
 ├── assets/                    # Tài nguyên tĩnh (hình ảnh, banner)
