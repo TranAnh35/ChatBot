@@ -1,5 +1,3 @@
-# ChatBot
-
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.10+-blue" alt="Python 3.10+">
   <img src="https://img.shields.io/badge/Node.js-18+-green" alt="Node.js 18+">
