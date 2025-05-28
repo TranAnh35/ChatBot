@@ -3,26 +3,9 @@ import time
 from pathlib import Path
 from typing import Dict, Set, Tuple
 
-LAST_CHECK_FILE = "last_check.txt"
-SUPPORTED_FILE_EXTENSIONS = {
-    '.txt', '.pdf', '.doc', '.docx', '.yaml', '.yml'
-}
+from config.app_config import AppConfig
 
-def load_last_check_time() -> float:
-    """Load the last check time from file."""
-    try:
-        if os.path.exists(LAST_CHECK_FILE):
-            with open(LAST_CHECK_FILE, 'r', encoding='utf-8') as f:
-                return float(f.read().strip())
-        return 0.0
-    except Exception:
-        return 0.0
-
-def save_last_check_time() -> None:
-    """Save the current check time to file."""
-    current_time = time.time()
-    with open(LAST_CHECK_FILE, 'w', encoding='utf-8') as f:
-        f.write(str(current_time))
+config = AppConfig()
 
 def get_uploaded_files_info(upload_dir: str) -> Dict[str, float]:
     """Retrieve information about files in the upload directory."""
@@ -32,7 +15,7 @@ def get_uploaded_files_info(upload_dir: str) -> Dict[str, float]:
         return files_info
     for filename in os.listdir(upload_dir):
         file_ext = Path(filename).suffix.lower()
-        if file_ext not in SUPPORTED_FILE_EXTENSIONS:
+        if file_ext not in config.SUPPORTED_EXTENSIONS:
             continue
         file_path = os.path.join(upload_dir, filename)
         if os.path.isfile(file_path):
@@ -43,12 +26,12 @@ def get_uploaded_files_info(upload_dir: str) -> Dict[str, float]:
                 continue
     return files_info
 
-def process_file_changes(upload_info: Dict[str, float], db_file_names: Set[str], db_file_mtimes: Dict[str, float], last_check_time: float) -> Tuple[list, list]:
-    """Identify new, modified, or deleted files."""
+def process_file_changes(upload_info: Dict[str, float], db_file_names: Set[str], db_file_mtimes: Dict[str, float]) -> Tuple[list, list]:
+    """Identify new, modified, or deleted files based on database timestamps."""
     new_or_modified = []
     for file_name, mtime in upload_info.items():
         is_new = file_name not in db_file_names
-        is_modified = not is_new and mtime > last_check_time
+        is_modified = not is_new and file_name in db_file_mtimes and mtime > db_file_mtimes[file_name]
         if is_new or is_modified:
             new_or_modified.append(file_name)
     deleted = list(db_file_names - upload_info.keys())
