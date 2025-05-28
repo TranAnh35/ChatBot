@@ -4,18 +4,9 @@ from services.conversation.service import ConversationService
 import faiss
 
 class GeneratorService:
-    """Dịch vụ tạo nội dung sử dụng mô hình ngôn ngữ.
-    
-    Lớp này xử lý việc tạo phản hồi từ mô hình ngôn ngữ, quản lý lịch sử hội thoại
-    và cung cấp các câu trả lời nhanh để tối ưu hiệu suất.
-    """
     
     def __init__(self) -> None:
-        """Khởi tạo GeneratorService với LLM và ConversationService.
-        
-        Khởi tạo đối tượng LLM để tạo nội dung và ConversationService để quản lý
-        lịch sử hội thoại. Đồng thời khởi tạo từ điển các câu trả lời nhanh.
-        """
+
         self.llm = LLM()
         self.conversation_service = ConversationService()
         self.quick_responses = {
@@ -36,22 +27,7 @@ class GeneratorService:
         web_response: Optional[str] = None,
         file_response: Optional[str] = None
     ) -> str:
-        """Tạo nội dung dựa trên prompt và các ngữ cảnh bổ sung.
-        
-        Args:
-            prompt (str): Nội dung câu hỏi hoặc yêu cầu từ người dùng.
-            conversation_id (Optional[str]): ID của cuộc hội thoại hiện tại.
-            rag_response (Optional[str]): Phản hồi từ hệ thống RAG.
-            web_response (Optional[str]): Kết quả tìm kiếm web.
-            file_response (Optional[str]): Nội dung từ file đính kèm.
-            
-        Returns:
-            str: Phản hồi được tạo ra từ mô hình ngôn ngữ.
-            
-        Note:
-            Nếu prompt khớp với các câu hỏi thông thường, sẽ trả về câu trả lời nhanh
-            để tối ưu hiệu suất.
-        """
+        """Tạo nội dung dựa trên prompt và các ngữ cảnh bổ sung."""
         prompt_lower = prompt.lower().strip()
         if (
             prompt_lower in self.quick_responses
@@ -87,14 +63,7 @@ class GeneratorService:
         return response
     
     async def merge_context(self, web_results: List[List[Dict]]) -> str:
-        """Hợp nhất kết quả tìm kiếm web thành một văn bản thống nhất.
-        
-        Args:
-            web_results (List[List[Dict]]): Danh sách các kết quả tìm kiếm web.
-            
-        Returns:
-            str: Văn bản đã được hợp nhất từ các kết quả tìm kiếm.
-        """
+        """Hợp nhất kết quả tìm kiếm web thành một văn bản thống nhất."""
         return await self.llm.merge_context(web_results)
 
     def create_vector_index(self) -> None:
@@ -102,10 +71,7 @@ class GeneratorService:
         
         Phương thức này khởi tạo một chỉ số vector sử dụng thuật toán HNSW (Hierarchical
         Navigable Small World) thay vì thuật toán FlatL2 để tăng hiệu suất tìm kiếm.
-        
-        Note:
-            Tham số M=32 trong HNSW quyết định số lượng kết nối tối đa cho mỗi nút.
-            Giá trị này ảnh hưởng đến độ chính xác và tốc độ tìm kiếm.
         """
+
         vector_size = self.llm.get_sentence_embedding_dimension()
         self.index = faiss.IndexHNSWFlat(vector_size, 32)

@@ -10,8 +10,6 @@ import { UploadedFile } from '../../types/interface';
 import { ConversationSidebar } from './ConversationSidebar';
 import { useSnackbar } from 'notistack';
 
-// Sử dụng ID người dùng cố định cho toàn bộ ứng dụng
-// Vì không có hệ thống đăng nhập, chúng ta sẽ sử dụng một ID cố định cho tất cả cuộc trò chuyện
 const DEFAULT_USER_ID = "default_user";
 
 export const ChatBot: React.FC<ChatBotProps> = ({ 
@@ -39,23 +37,10 @@ export const ChatBot: React.FC<ChatBotProps> = ({
   const [isConversationsLoading, setIsConversationsLoading] = useState(false);
   // State để theo dõi xem đã tải xong cuộc trò chuyện hay chưa
   const [isConversationsLoaded, setIsConversationsLoaded] = useState(false);
+  // State để theo dõi xem có đang trong quá trình gửi tin nhắn không
+  const [isSendingMessage, setIsSendingMessage] = useState(false);
 
   const { enqueueSnackbar } = useSnackbar();
-
-  // Load danh sách cuộc trò chuyện khi component mounts
-  useEffect(() => {
-    loadConversations();
-  }, []);
-
-  // Load conversation history when selecting a conversation
-  useEffect(() => {
-    if (currentConversationId) {
-      loadConversationHistory(currentConversationId);
-    } else {
-      // Nếu không có cuộc trò chuyện nào được chọn, làm sạch danh sách tin nhắn
-      setMessages([]);
-    }
-  }, [currentConversationId]);
 
   const loadConversations = useCallback(async () => {
     setIsConversationsLoading(true);
@@ -92,13 +77,25 @@ export const ChatBot: React.FC<ChatBotProps> = ({
     }
   }, [enqueueSnackbar]);
 
+  useEffect(() => {
+    loadConversations();
+  }, [loadConversations]);
+
+  useEffect(() => {
+    if (currentConversationId && !isSendingMessage) {
+      loadConversationHistory(currentConversationId);
+    } else if (!currentConversationId && !isSendingMessage) {
+      setMessages([]);
+    }
+  }, [currentConversationId, isSendingMessage, loadConversationHistory]);
+
   const handleCreateNewConversation = useCallback(async () => {
     setIsLoading(true);
     try {
       const newConversationId = await createConversation(userId);
       setCurrentConversationId(newConversationId);
       setMessages([]);
-      loadConversations(); // Refresh the list
+      loadConversations();
       if (onCloseConversations) {
         onCloseConversations();
       }
@@ -126,7 +123,7 @@ export const ChatBot: React.FC<ChatBotProps> = ({
     try {
       const success = await renameConversation(conversationId, title);
       if (success) {
-        loadConversations(); // Tải lại danh sách để cập nhật tiêu đề mới
+        loadConversations();
         enqueueSnackbar('Đã đổi tên cuộc trò chuyện', { 
           variant: 'success',
         });
@@ -169,7 +166,7 @@ export const ChatBot: React.FC<ChatBotProps> = ({
 
   const convertFilesToUploadedFiles = (files: File[]): UploadedFile[] => {
     return files.map((file, index) => ({
-      id: `${Date.now()}-${index}`, // Tạo id duy nhất (có thể thay đổi logic nếu cần)
+      id: `${Date.now()}-${index}`,
       name: file.name,
       size: file.size,
       type: file.type,
@@ -177,19 +174,28 @@ export const ChatBot: React.FC<ChatBotProps> = ({
   };
 
   const handleSend = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || !isConversationsLoaded) return;
   
-    // Nếu không có cuộc trò chuyện hiện tại, tạo một cuộc mới
-    if (!currentConversationId) {
+    const userInput = input.trim();
+    setInput('');
+    setIsLoading(true);
+    setIsSendingMessage(true);
+
+    let conversationId = currentConversationId;
+    
+    if (!conversationId) {
       try {
-        const newConversationId = await createConversation(userId);
-        setCurrentConversationId(newConversationId);
-        loadConversations(); // Refresh the list
+        conversationId = await createConversation(userId);
+        setCurrentConversationId(conversationId);
+        loadConversations();
       } catch (error) {
         console.error('Error creating conversation:', error);
         enqueueSnackbar('Lỗi khi tạo cuộc trò chuyện, thử lại sau', { 
           variant: 'error',
         });
+        setIsLoading(false);
+        setIsSendingMessage(false);
+        setInput(userInput);
         return;
       }
     }
@@ -198,22 +204,20 @@ export const ChatBot: React.FC<ChatBotProps> = ({
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      content: input,
+      content: userInput,
       sender: 'user',
       timestamp: new Date(),
       attachments: uploadedFilesArray,
     };
   
     setMessages((prev) => [...prev, userMessage]);
-    setInput('');
-    setIsLoading(true);
   
     try {
       const requestData: GenerateContentRequest = {
         input: userMessage.content,
         files: chatFiles.length > 0 ? [...chatFiles] : undefined,
         isWebSearchEnabled: isWebSearchEnabled,
-        conversationId: currentConversationId
+        conversationId: conversationId
       };
   
       const data = await generateContent(requestData);
@@ -228,9 +232,8 @@ export const ChatBot: React.FC<ChatBotProps> = ({
       setIsTyping(true);
       setMessages((prev) => [...prev, botMessage]);
   
-      setChatFiles([]); // Xóa file sau khi gửi để không lưu lại
+      setChatFiles([]);
       
-      // Refresh conversations list after sending a message
       loadConversations();
     } catch (error) {
       console.error('Error generating content:', error);
@@ -243,6 +246,7 @@ export const ChatBot: React.FC<ChatBotProps> = ({
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
+      setIsSendingMessage(false);
     }
   };
 

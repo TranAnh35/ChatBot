@@ -2,16 +2,11 @@ import sqlite3
 from typing import List, Tuple, Optional
 
 class VectorDBRepository:
-    """Repository cho thao tác với bảng files và chunks trong SQLite."""
     def __init__(self, db_path: str = "vector_store.db"):
         self.db_path = db_path
 
     def get_all_files(self) -> List[Tuple[int, str, int, str, str]]:
-        """Lấy danh sách tất cả các file đã được lưu trong database.
-
-        Returns:
-            List[Tuple[int, str, int, str, str]]: Danh sách các file.
-        """
+        """Lấy danh sách tất cả các file đã được lưu trong database."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         cursor.execute("""
@@ -24,13 +19,7 @@ class VectorDBRepository:
         return files
 
     def get_chunks_by_file(self, file_name: str) -> List[Tuple[int, str, int]]:
-        """Lấy tất cả các chunks thuộc về một file cụ thể.
-
-        Args:
-            file_name (str): Tên file cần lấy chunks.
-        Returns:
-            List[Tuple[int, str, int]]: Danh sách các chunks.
-        """
+        """Lấy tất cả các chunks thuộc về một file cụ thể."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         cursor.execute("""
@@ -45,13 +34,7 @@ class VectorDBRepository:
         return chunks
 
     def get_chunk_by_id(self, doc_id: int) -> Optional[str]:
-        """Lấy nội dung chunk dựa trên ID.
-
-        Args:
-            doc_id (int): ID của chunk cần lấy.
-        Returns:
-            Optional[str]: Nội dung của chunk nếu tìm thấy, None nếu không.
-        """
+        """Lấy nội dung chunk dựa trên ID."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         cursor.execute("SELECT content FROM chunks WHERE id = ?", (doc_id,))
@@ -60,11 +43,7 @@ class VectorDBRepository:
         return result[0] if result else None
 
     def delete_file(self, file_name: str) -> None:
-        """Xóa toàn bộ dữ liệu liên quan đến một file khỏi database.
-
-        Args:
-            file_name (str): Tên file cần xóa.
-        """
+        """Xóa toàn bộ dữ liệu liên quan đến một file khỏi database."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         cursor.execute("SELECT id FROM files WHERE name = ?", (file_name,))

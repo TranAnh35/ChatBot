@@ -11,7 +11,8 @@ from sentence_transformers import SentenceTransformer
 from services.vector_db.service import VectorDB
 from models.llm import LLM
 
-# Import các tiện ích đã tách
+from config.torch_config import device, suppress_pytorch_warnings
+
 from utils.rag_file_utils import (
     load_last_check_time, save_last_check_time, get_uploaded_files_info, process_file_changes
 )
@@ -19,7 +20,6 @@ from utils.faiss_utils import create_new_index, save_index_to_disk, load_index_a
 from utils.rag_utils import calculate_relevance, process_web_search_results, process_chunk_batch
 from utils.rag_constants import FAISS_INDEX_PATH, CHUNK_MAPPING_PATH, LAST_CHECK_FILE, SUPPORTED_FILE_EXTENSIONS
 
-# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -31,27 +31,9 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 class RAGService:
-    """Service for Retrieval-Augmented Generation (RAG) operations.
-    
-    This class combines language models with a vector database to provide
-    context-aware responses based on stored documents.
-    
-    Attributes:
-        upload_dir (str): Directory containing uploaded files.
-        vector_db (VectorDB): Manages the vector database operations.
-        model (SentenceTransformer): Text embedding model.
-        llm (LLM): Large language model for response generation.
-        chunk_id_mapping (List[int]): Mapping of chunk IDs.
-        index (faiss.Index): FAISS index for vector search.
-        last_check_time (float): Timestamp of last file check.
-    """
     
     def __init__(self, upload_dir: str = "upload") -> None:
-        """Initialize RAGService with required components.
-        
-        Args:
-            upload_dir (str): Path to the directory containing uploaded files.
-        """
+        """Initialize RAGService with required components."""
         self.upload_dir = upload_dir
         os.makedirs(self.upload_dir, exist_ok=True)
         self.vector_db = VectorDB()
@@ -73,11 +55,7 @@ class RAGService:
             raise
 
     def _get_database_files_info(self) -> Tuple[Set[str], Dict[str, float]]:
-        """Retrieve information about files stored in the database.
-        
-        Returns:
-            Tuple[Set[str], Dict[str, float]]: Set of filenames, dict of filename to mtime.
-        """
+        """Retrieve information about files stored in the database."""
         try:
             db_files = self.vector_db.get_all_files()
             db_file_names = {file[1] for file in db_files}
@@ -89,11 +67,7 @@ class RAGService:
             return set(), {}
 
     def _process_modified_files(self, file_names: List[str]) -> None:
-        """Process new or modified files.
-        
-        Args:
-            file_names (List[str]): List of filenames to process.
-        """
+        """Process new or modified files."""
         if not file_names:
             return
         logger.info(f"Starting processing of {len(file_names)} new/modified files")
@@ -112,11 +86,7 @@ class RAGService:
                 logger.error(f"Error processing file {file_name}: {str(e)}", exc_info=True)
 
     def _process_deleted_files(self, deleted_files: List[str]) -> None:
-        """Process files that have been deleted from the upload directory.
-        
-        Args:
-            deleted_files (List[str]): List of filenames that have been deleted.
-        """
+        """Process files that have been deleted from the upload directory."""
         if not deleted_files:
             return
         logger.info(f"Starting processing of {len(deleted_files)} deleted files")
@@ -128,11 +98,7 @@ class RAGService:
                 logger.error(f"Error removing file {file_name}: {str(e)}")
 
     def check_and_update_files(self) -> bool:
-        """Check for and process any changes in the upload directory.
-        
-        Returns:
-            bool: True if changes were detected and processed, False otherwise.
-        """
+        """Check for and process any changes in the upload directory."""
         try:
             upload_info = get_uploaded_files_info(self.upload_dir)
             db_file_names, db_file_mtimes = self._get_database_files_info()
@@ -175,7 +141,6 @@ class RAGService:
             logger.critical(f"Critical error initializing index: {str(e)}")
             raise
 
-    # Các hàm xử lý relevance, chunk batch, web search result sẽ dùng utils
     def calculate_relevance(self, query: str, result: Dict[str, Any]) -> float:
         """Tính điểm relevance của kết quả tìm kiếm với query."""
         return calculate_relevance(query, result)
@@ -190,21 +155,16 @@ class RAGService:
 
     def query(self, question: str) -> str:
         """Truy vấn hệ thống RAG với câu hỏi đầu vào và trả về câu trả lời."""
-        # 1. Lấy embedding cho câu hỏi
         query_embedding = self.model.encode([question])
-        # 2. Tìm kiếm các chunk liên quan trong FAISS index
         if self.index is None or self.index.ntotal == 0:
             return "Không có dữ liệu để truy vấn. Vui lòng upload tài liệu trước."
-        D, I = self.index.search(query_embedding, k=5)  # Lấy 5 chunk liên quan nhất
-        # 3. Lấy nội dung các chunk từ mapping
+        D, I = self.index.search(query_embedding, k=5)  
         context_chunks = []
         for idx in I[0]:
             if idx < len(self.chunk_id_mapping):
                 chunk_info = self.chunk_id_mapping[idx]
-                # chunk_info có thể là dict hoặc str, tùy cách bạn lưu
                 context_chunks.append(str(chunk_info))
         context = "\n".join(context_chunks)
-        # 4. Sinh câu trả lời từ LLM
         prompt = f"Context:\n{context}\n\nQuestion: {question}\nAnswer:"
         response = self.llm.generate(prompt)
         return response

@@ -1,24 +1,16 @@
-"""Service phân tích truy vấn tìm kiếm cho web search."""
-
 import re
 from typing import Dict, Union, List
 from models.llm import LLM
 from services.text_processing import TextProcessing
 
 class SearchQueryAnalyzer:
-    """Phân tích truy vấn tìm kiếm, trích xuất keyword, domain, loại truy vấn, ..."""
+    
     def __init__(self):
         self.llm = LLM()
         self.text_processing = TextProcessing()
 
     async def analyze(self, prompt: str) -> Dict[str, Union[str, List[str]]]:
-        """Phân tích prompt để trích xuất thông tin tìm kiếm.
-
-        Args:
-            prompt (str): Câu hỏi hoặc yêu cầu tìm kiếm từ người dùng.
-        Returns:
-            Dict[str, Union[str, List[str]]]: Thông tin truy vấn.
-        """
+        """Phân tích prompt để trích xuất thông tin tìm kiếm."""
         simple_time_keywords = {
             "hôm nay": "very_recent", 
             "gần đây": "recent",

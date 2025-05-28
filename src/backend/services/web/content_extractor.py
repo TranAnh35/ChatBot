@@ -1,12 +1,9 @@
-"""Service lấy nội dung trang web từ URL."""
-
 import requests
 from bs4 import BeautifulSoup
 import re
 from typing import Dict
 
 class WebContentExtractor:
-    """Lấy nội dung trang web từ URL, loại bỏ phần không cần thiết."""
     def __init__(self):
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
@@ -18,13 +15,7 @@ class WebContentExtractor:
         }
 
     def extract(self, url: str) -> Dict[str, str]:
-        """Lấy nội dung chính của trang web.
-
-        Args:
-            url (str): Đường dẫn URL của trang web cần lấy nội dung.
-        Returns:
-            Dict[str, str]: title, content, url, warning nếu có.
-        """
+        """Lấy nội dung chính của trang web."""
         try:
             if not url.startswith(('http://', 'https://')):
                 return {"error": "URL không hợp lệ. URL phải bắt đầu bằng http:// hoặc https://"}

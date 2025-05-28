@@ -1,5 +1,3 @@
-"""Service đọc file async theo định dạng."""
-
 import os
 from fastapi import UploadFile
 from docling.document_converter import DocumentConverter
@@ -11,15 +9,8 @@ import io
 UPLOAD_FOLDER = "upload"
 
 class AsyncFileReader:
-    """Đọc file async theo định dạng (pdf, docx, yaml, txt, ...)."""
+    
     async def read_uploaded_file(self, file: UploadFile) -> str:
-        """Đọc nội dung file tải lên từ client dựa trên định dạng.
-
-        Args:
-            file (UploadFile): Đối tượng file tải lên từ client.
-        Returns:
-            str: Nội dung file dưới dạng văn bản.
-        """
         file_name = file.filename
         content: str = ""
         try:

@@ -5,18 +5,8 @@ from typing import List, Dict, Optional
 load_dotenv()
 
 class LLM:
-    """Lớp xử lý tương tác với mô hình ngôn ngữ.
-    
-    Lớp này cung cấp các phương thức để tạo nội dung sử dụng Google's Generative AI,
-    với hỗ trợ ngữ cảnh từ RAG, tìm kiếm web và file đính kèm.
-    """
     
     def __init__(self):
-        """Khởi tạo LLM với cấu hình Google's Generative AI.
-        
-        Đọc khóa API từ biến môi trường và thiết lập mô hình.
-        Đồng thời định nghĩa prompt hệ thống để hướng dẫn hành vi của mô hình.
-        """
         genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
         self.model = genai.GenerativeModel("gemini-2.0-flash")
         
@@ -50,20 +40,6 @@ class LLM:
         
         Kết hợp prompt hệ thống, lịch sử hội thoại và bất kỳ ngữ cảnh nào được cung cấp
         (RAG, web, file) để tạo ra phản hồi phù hợp và mạch lạc.
-        
-        Agrs:
-            prompt (str): Prompt đầu vào từ người dùng.
-            rag_response (str, optional): Ngữ cảnh từ RAG (Retrieval-Augmented Generation).
-            web_response (str, optional): Kết quả tìm kiếm web.
-            file_response (str, optional): Nội dung từ file đính kèm.
-            conversation_history (str, optional): Lịch sử hội thoại.
-            
-        Returns:
-            str: Phản hồi được tạo ra từ mô hình ngôn ngữ.
-            
-        Ghi chú:
-            Tự động phân tích prompt để xác định xem có cần thêm ngữ cảnh không
-            và điều chỉnh phản hồi cho phù hợp.
         """
         try:
             needs_analysis = self.should_analyze_prompt(prompt)
@@ -112,12 +88,6 @@ class LLM:
         
         Sử dụng các heuristic như độ dài, dấu hỏi và từ khóa cụ thể
         để quyết định xem prompt có cần xử lý bổ sung không.
-        
-        Agrs:
-            prompt (str): Đầu vào từ người dùng cần phân tích.
-            
-        Returns:
-            bool: True nếu prompt cần phân tích, False nếu không.
         """
         if len(prompt) < 10 or "?" not in prompt:
             return False
@@ -135,12 +105,6 @@ class LLM:
         
         Xác định thông tin bổ sung có thể cần thiết để phản hồi prompt,
         chẳng hạn như kết quả tìm kiếm web hoặc nội dung file.
-        
-        Agrs:
-            prompt (str): Đầu vào từ người dùng cần phân tích.
-            
-        Returns:
-            str: Phân tích ngắn gọn về thông tin cần thiết để phản hồi prompt.
         """
         try:
             combined_prompt = f"""Phân tích ngắn gọn câu hỏi: "{prompt}"
@@ -162,18 +126,6 @@ class LLM:
         
         Xử lý nhiều kết quả tìm kiếm web, loại bỏ trùng lặp và định dạng
         thành một chuỗi dễ đọc cho mô hình ngôn ngữ.
-        
-        Agrs:
-            web_results (List[List[Dict]]): Danh sách kết quả tìm kiếm web, mỗi kết quả
-                                          là một danh sách từ điển chứa trường 'snippet'.
-                                          
-        Returns:
-            str: Một chuỗi đã được hợp nhất và loại bỏ trùng lặp chứa thông tin
-                 liên quan từ kết quả tìm kiếm web.
-                 
-        Ghi chú:
-            Nếu không tìm thấy snippet hợp lệ, trả về thông báo cho biết
-            không có thông tin hợp lệ nào được tìm thấy.
         """
         seen_snippets = set()
         merged_context = ""
