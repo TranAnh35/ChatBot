@@ -30,17 +30,22 @@ export interface MessageContentProps {
 }
 
 export interface FileSelectorProps {
-  uploadedFiles: ChatBoxProps['uploadedFiles'];
-  selectedFiles: ChatBoxProps['selectedFiles'];
-  onFileSelect: ChatBoxProps['onFileSelect'];
+  uploadedFiles: ChatBotProps['uploadedFiles'];
+  selectedFiles: ChatBotProps['selectedFiles'];
+  onFileSelect: ChatBotProps['onFileSelect'];
   onClose: () => void;
 }
 
-export interface ChatBoxProps {
+export interface ChatBotProps {
   uploadedFiles: UploadedFile[];
   selectedFiles: UploadedFile[];
   onFileSelect: (file: UploadedFile) => void;
   onUploadClick: () => void;
+  userId?: string;
+  currentConversationId?: string;
+  onConversationSelect?: (conversationId: string) => void;
+  showConversations?: boolean;
+  onCloseConversations?: () => void;
 }
 
 export interface FileDropzoneProps {
@@ -66,9 +71,31 @@ export interface GenerateContentRequest {
   input: string; // Nội dung tin nhắn
   files?: File[]; // Danh sách file đính kèm (tùy chọn)
   isWebSearchEnabled?: boolean;
+  conversationId?: string; // ID cuộc trò chuyện (nếu có)
 }
 
 export interface GenerateContentResponse {
   content: string; // Nội dung phản hồi từ API
   // Thêm các trường khác nếu API trả về thêm dữ liệu
+}
+
+export interface Conversation {
+  conversation_id: string;
+  user_id: string;
+  title?: string; // Tiêu đề cuộc trò chuyện
+  created_at: string;
+  updated_at: string;
+  preview?: string;
+  messages: Message[];
+}
+
+export interface ConversationSidebarProps {
+  userId: string;
+  conversations: Conversation[];
+  currentConversationId?: string;
+  onConversationSelect: (conversationId: string) => void;
+  onCreateNewConversation: () => void;
+  onDeleteConversation: (conversationId: string) => void;
+  onRenameConversation?: (conversationId: string, title: string) => void;
+  isLoading: boolean;
 }

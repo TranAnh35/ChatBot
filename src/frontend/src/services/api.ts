@@ -1,7 +1,7 @@
 import api from '../lib/axios';
 import { GenerateContentResponse } from '../types/api';
 import { UploadedFile } from '../types/interface';
-import { GenerateContentRequest } from '../types/chat';
+import { GenerateContentRequest, Conversation, Message } from '../types/chat';
 
 // Gọi API tạo nội dung từ LLM và RAG
 export const generateContent = async (data: GenerateContentRequest): Promise<GenerateContentResponse> => {
@@ -51,6 +51,7 @@ export const generateContent = async (data: GenerateContentRequest): Promise<Gen
       rag_response: ragResponse.data.response,
       file_response: fileContents,
       web_response: webResponse?.data.content,
+      conversation_id: data.conversationId
     },
   });
 
@@ -101,4 +102,44 @@ export const validateApiKey = async (apiKey: string): Promise<boolean> => {
     console.error("API key validation failed:", error);
     return false;
   }
+};
+
+// Conversation API methods
+export const createConversation = async (userId: string): Promise<string> => {
+  const response = await api.post<{ conversation_id: string }>('/conversations/create', {
+    user_id: userId
+  });
+  return response.data.conversation_id;
+};
+
+export const getConversationHistory = async (conversationId: string, limit: number = 10): Promise<Message[]> => {
+  const response = await api.get<{ messages: any[] }>(`/conversations/${conversationId}/history`, {
+    params: { limit }
+  });
+  
+  // Chuyển đổi dữ liệu từ backend (role: "user"/"assistant") sang dạng frontend (sender: "user"/"bot")
+  return response.data.messages.map(message => ({
+    id: message.timestamp, // Sử dụng timestamp làm ID nếu không có ID
+    content: message.content,
+    sender: message.role === "user" ? "user" : "bot", // Chuyển đổi role thành sender
+    timestamp: new Date(message.timestamp)
+  }));
+};
+
+export const listUserConversations = async (userId: string): Promise<Conversation[]> => {
+  const response = await api.get<{ conversations: Conversation[] }>(`/conversations/user/${userId}`);
+  return response.data.conversations;
+};
+
+export const deleteConversation = async (conversationId: string): Promise<boolean> => {
+  const response = await api.delete<{ success: boolean }>(`/conversations/${conversationId}`);
+  return response.data.success;
+};
+
+export const renameConversation = async (conversationId: string, title: string): Promise<boolean> => {
+  const response = await api.post<{ success: boolean }>('/conversations/rename', {
+    conversation_id: conversationId,
+    title: title
+  });
+  return response.data.success;
 };

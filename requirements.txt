@@ -21,7 +21,8 @@ Pillow
 
 python-multipart
 pydantic
-PyPDF2
+docling
+PyMuPDF==1.24.5
 python-docx
 PyYAML
 
@@ -31,3 +32,4 @@ torch --index-url https://download.pytorch.org/whl/cpu
 transformers==4.50.3
 
 uvicorn
+psutil
